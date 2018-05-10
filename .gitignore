@@ -1,2 +1,5 @@
 # ignoring any scratch text files
 *.txt
+
+# ignoring .vscode folders
+**/.vscode
