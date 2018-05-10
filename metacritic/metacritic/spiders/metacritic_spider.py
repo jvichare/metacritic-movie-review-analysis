@@ -23,7 +23,7 @@ class MetacriticSpider(Spider):
         of that year, and generate a list of URLs and then yield a request to each
         movie page URL.
         """
-        movie_list = response.xpath('//td[@class="title_wrapper"]/div/a/text()').extract()
+        movie_list = response.xpath('//td[@class="title_wrapper"]/div/a/text()')).extract()
 
         for movie in movie_list:
             print(movie)
