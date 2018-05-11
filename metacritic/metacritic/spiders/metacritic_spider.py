@@ -25,8 +25,8 @@ class MetacriticSpider(Spider):
         """
 
         # Getting the individual URLs for each movie
-        movie_url_suffix = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
-        movie_urls_list = ['http://metacritic.com' + movie for movie in movie_url_suffix]
+        movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
+        movie_urls_list = ['http://metacritic.com' + movie for movie in movie_url_path]
 
         for movie_url in movie_urls_list:
             yield Request(url=movie_url, callback=self.parse_movie_page)
@@ -43,3 +43,29 @@ class MetacriticSpider(Spider):
         metascore = response.xpath('//div[@class="metascore_w larger movie positive"]/text()').extract_first()
         user_score = response.xpath('//div[@class="metascore_w user larger movie positive"]/text()').extract_first()
 
+        # writing the fields to the metacritic item
+        item = MetacriticItem()
+        
+        item['movie'] = movie
+        item['release_date'] = release_date
+        item['genre'] = genre
+        item['metascore'] = metascore
+        item['user_score'] = user_score
+
+        yield item
+
+        # grabbing the path for critic and user reviews
+        critic_review_path = response.xpath('//a[@class="see_all boxed oswald"]/@href').extract()[0]
+        user_review_path = response.xpath('//a[@class="see_all boxed oswald"]/@href').extract()[1]
+        critic_review_url = 'http://metacritic.com' + critic_review_path
+        user_review_url = 'http://metacritic.com' + user_review_path
+
+        yield Request(url=critic_review_url, callback=self.parse_critic_reviews)
+
+        yield Request(url=user_review_url, callback=self.parse_user_reviews)
+
+    def parse_critic_reviews(self, response):
+        pass
+
+    def parse_user_reviews(self, response):
+        pass
