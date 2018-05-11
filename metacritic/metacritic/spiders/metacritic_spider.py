@@ -24,7 +24,7 @@ class MetacriticSpider(Spider):
         movie page URL.
         """
 
-        Getting the individual URLs for each movie
+        # Getting the individual URLs for each movie
         movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
         movie_urls_list = ['http://www.metacritic.com' + movie for movie in movie_url_path]
 
