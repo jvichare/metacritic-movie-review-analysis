@@ -1,6 +1,7 @@
 from scrapy import Spider, Request
 from metacritic.items import MetacriticItem
 import re
+import numpy as np
 
 class MetacriticSpider(Spider):
     name = 'metacritic_spider'
@@ -40,9 +41,15 @@ class MetacriticSpider(Spider):
         release_date = response.xpath('//span[@class="release_date"]/span[2]/text()').extract_first()
         genre_list = response.xpath('//div[@class="genres"]/span[2]').extract() # have to fix this list
         scores = response.xpath('//a[@class="metascore_anchor"]/div/text()').extract()
-        metascore = int(scores[0]) # integer from 0 - 100
-        user_score = float(scores[1]) # number between 0 - 10, that is why I use 
-                                      # float() instead of int()
+        try:
+            metascore = int(scores[0]) # integer from 0 - 100
+        except:
+            metascore = np.nan
+        try:
+            user_score = float(scores[1]) # number between 0 - 10, that is why I use 
+                                        # float() instead of int()
+        except:
+            user_score = np.nan
 
         # cleaning up the scraped list of genres
         genre_string = ''.join(genre_list)
@@ -104,7 +111,10 @@ class MetacriticSpider(Spider):
 
             item['review'] = reviews[i].strip()
             item['username'] = usernames[i]
-            item['review_score'] = int(review_scores[i])
+            try:
+                item['review_score'] = int(review_scores[i])
+            except:
+                item['review_score'] = np.nan
 
             yield item
 
@@ -139,7 +149,10 @@ class MetacriticSpider(Spider):
 
             item['review'] = reviews[i].strip()
             item['username'] = usernames[i]
-            item['review_score'] = int(review_scores[i])
+            try:
+                item['review_score'] = int(review_scores[i])
+            except:
+                item['review_score'] = np.nan
 
             yield item
         
@@ -194,6 +207,9 @@ class MetacriticSpider(Spider):
 
             item['review'] = reviews[i].strip()
             item['username'] = usernames[i]
-            item['review_score'] = int(review_scores[i])
+            try:
+                item['review_score'] = int(review_scores[i])
+            except:
+                item['review_score'] = np.nan
 
             yield item
