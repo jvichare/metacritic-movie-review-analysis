@@ -40,8 +40,8 @@ class MetacriticSpider(Spider):
         release_date = response.xpath('//span[@class="release_date"]/span[2]/text()').extract_first()
         genre_list = response.xpath('//div[@class="genres"]/span[2]').extract() # have to fix this list
         scores = response.xpath('//a[@class="metascore_anchor"]/div/text()').extract()
-        metascore = int(scores[0]) # integer from 0 -> 100
-        user_score = float(scores[1]) # number between 0 -> 10, that is why I use 
+        metascore = int(scores[0]) # integer from 0 - 100
+        user_score = float(scores[1]) # number between 0 - 10, that is why I use 
                                       # float() instead of int()
 
         # cleaning up the scraped list of genres
@@ -139,8 +139,7 @@ class MetacriticSpider(Spider):
 
             item['review'] = reviews[i].strip()
             item['username'] = usernames[i]
-            item['review_score'] = float(review_scores[i]) # they are a decimal for now,
-                                                           # will convert during cleanup
+            item['review_score'] = int(review_scores[i])
 
             yield item
         
@@ -195,7 +194,6 @@ class MetacriticSpider(Spider):
 
             item['review'] = reviews[i].strip()
             item['username'] = usernames[i]
-            item['review_score'] = float(review_scores[i]) # they are a decimal for now,
-                                                           # will convert during cleanup
+            item['review_score'] = int(review_scores[i])
 
             yield item
