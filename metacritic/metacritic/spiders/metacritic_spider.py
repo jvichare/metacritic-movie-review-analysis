@@ -123,7 +123,7 @@ class MetacriticSpider(Spider):
         user_type = "user"
 
         # User reviews and score attributes
-        reviews = user_revews = response.xpath('//span[@class="blurb blurb_expanded"]/text()').extract()
+        reviews = response.xpath('//span[@class="blurb blurb_expanded"]/text()').extract()
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
 
