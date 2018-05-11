@@ -23,8 +23,23 @@ class MetacriticSpider(Spider):
         of that year, and generate a list of URLs and then yield a request to each
         movie page URL.
         """
-        movie_list = response.xpath('//td[@class="title_wrapper"]/div/a/text()')).extract()
 
-        for movie in movie_list:
-            print(movie)
+        # Getting the individual URLs for each movie
+        movie_url_suffix = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
+        movie_urls_list = ['http://metacritic.com' + movie for movie in movie_url_suffix]
+
+        for movie_url in movie_urls_list:
+            yield Request(url=movie_url, callback=self.parse_movie_page)
+
+    def parse_movie_page(self, response):
+        """
+        This function grabs the critic reviews URL and user reviews URL for each movie,
+        as well as specific information available on the movie page
+        """
+
+        movie = response.xpath('//div[@class="product_page_title oswald"]/h1/text()').extract_first()
+        release_date = response.xpath('//span[@class="release_date"]/span[2]/text()').extract_first()
+        genre = response.xpath('//div[@class="genres"]/span[2]').extract() # have to fix this list
+        metascore = response.xpath('//div[@class="metascore_w larger movie positive"]/text()').extract_first()
+        user_score = response.xpath('//div[@class="metascore_w user larger movie positive"]/text()').extract_first()
 
