@@ -6,3 +6,9 @@
 
 # ignoring __pycache__/ folders
 **/__pycache__/
+
+# ignoring vscode workspace file
+*.code-workspace
+
+# ignoring ipython checkpoints
+**/.ipynb_checkpoints/
