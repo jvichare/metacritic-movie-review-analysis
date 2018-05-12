@@ -12,3 +12,6 @@
 
 # ignoring ipython checkpoints
 **/.ipynb_checkpoints/
+
+# ignoring csv file due to larger file size
+*.csv
