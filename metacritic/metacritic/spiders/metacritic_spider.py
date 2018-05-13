@@ -13,7 +13,7 @@ class MetacriticSpider(Spider):
         This function constructs a list of all the URLs for the most discussed movies
         from years 2010 to 2018, and will yield requests for each of them.
         """
-        year_url_list = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2017, -1)]
+        year_url_list = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2009, -1)]
 
         for url in year_url_list:
             yield Request(url=url, callback=self.parse_year_page)
@@ -26,11 +26,8 @@ class MetacriticSpider(Spider):
         """
 
         # Getting the individual URLs for each movie
-        # movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
-        # movie_urls_list = ['http://www.metacritic.com' + movie for movie in movie_url_path]
-
-        movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()[4]
-        movie_urls_list = ['http://www.metacritic.com' + movie_url_path]
+        movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
+        movie_urls_list = ['http://www.metacritic.com' + movie for movie in movie_url_path]
 
         for movie_url in movie_urls_list:
             yield Request(url=movie_url, callback=self.parse_movie_page)
