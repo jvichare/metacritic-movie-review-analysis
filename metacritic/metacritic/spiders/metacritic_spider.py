@@ -13,7 +13,7 @@ class MetacriticSpider(Spider):
         This function constructs a list of all the URLs for the most discussed movies
         from years 2010 to 2018, and will yield requests for each of them.
         """
-        year_url_list = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2009, -1)]
+        year_url_list = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2017, -1)]
 
         for url in year_url_list:
             yield Request(url=url, callback=self.parse_year_page)
@@ -26,8 +26,11 @@ class MetacriticSpider(Spider):
         """
 
         # Getting the individual URLs for each movie
-        movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
-        movie_urls_list = ['http://www.metacritic.com' + movie for movie in movie_url_path]
+        # movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()
+        # movie_urls_list = ['http://www.metacritic.com' + movie for movie in movie_url_path]
+
+        movie_url_path = response.xpath('//td[@class="title_wrapper"]/div/a/@href').extract()[4]
+        movie_urls_list = ['http://www.metacritic.com' + movie_url_path]
 
         for movie_url in movie_urls_list:
             yield Request(url=movie_url, callback=self.parse_movie_page)
@@ -133,7 +136,17 @@ class MetacriticSpider(Spider):
         user_type = "user"
 
         # User reviews and score attributes
-        reviews = response.xpath('//span[@class="blurb blurb_expanded"]/text()').extract()
+        reviews = response.xpath('//div[@class="review pad_top1"]')
+        review_list = []
+
+        for review in reviews:
+            if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
+                review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
+            elif len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) == 1:
+                review_list.append(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first())
+            else:
+                review_list.append(review.xpath('.//div[@class="review_body"]/span/text()').extract_first())
+
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
 
@@ -147,7 +160,7 @@ class MetacriticSpider(Spider):
             item['user_score'] = user_score
             item['user_type'] = user_type
 
-            item['review'] = reviews[i].strip()
+            item['review'] = review_list[i]
             item['username'] = usernames[i]
             try:
                 item['review_score'] = int(review_scores[i])
@@ -191,7 +204,17 @@ class MetacriticSpider(Spider):
         user_type = "user"
 
         # User reviews and score attributes
-        reviews = user_revews = response.xpath('//span[@class="blurb blurb_expanded"]/text()').extract()
+        reviews = response.xpath('//div[@class="review pad_top1"]')
+        review_list = []
+
+        for review in reviews:
+            if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
+                review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
+            elif len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) == 1:
+                review_list.append(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first())
+            else:
+                review_list.append(review.xpath('.//div[@class="review_body"]/span/text()').extract_first())
+
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
 
@@ -205,7 +228,7 @@ class MetacriticSpider(Spider):
             item['user_score'] = user_score
             item['user_type'] = user_type
 
-            item['review'] = reviews[i].strip()
+            item['review'] = review_list[i]
             item['username'] = usernames[i]
             try:
                 item['review_score'] = int(review_scores[i])
