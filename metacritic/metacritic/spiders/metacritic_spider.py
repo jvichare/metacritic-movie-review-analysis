@@ -136,6 +136,12 @@ class MetacriticSpider(Spider):
         reviews = response.xpath('//div[@class="review pad_top1"]')
         review_list = []
 
+        # User reviews come in multiple sizes, and some of them have <br> tags in the actual
+        # review, which splits up the review into multiple selectors. If they are split up into
+        # paragraphs, I have to join them (first conditional), or if they are long but
+        # not split by paragraphs (second conditional) I can keep the review, however if they
+        # shorter they have a different XPath location (third conditional) because the review
+        # does not need expansion.
         for review in reviews:
             if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
                 review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
@@ -204,6 +210,12 @@ class MetacriticSpider(Spider):
         reviews = response.xpath('//div[@class="review pad_top1"]')
         review_list = []
 
+        # User reviews come in multiple sizes, and some of them have <br> tags in the actual
+        # review, which splits up the review into multiple selectors. If they are split up into
+        # paragraphs, I have to join them (first conditional), or if they are long but
+        # not split by paragraphs (second conditional) I can keep the review, however if they
+        # shorter they have a different XPath location (third conditional) because the review
+        # does not need expansion.
         for review in reviews:
             if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
                 review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
