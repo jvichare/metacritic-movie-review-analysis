@@ -15,3 +15,6 @@
 
 # ignoring csv file due to larger file size
 *.csv
+
+* ignoring the figures folder
+**/fig/
