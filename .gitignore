@@ -16,5 +16,8 @@
 # ignoring csv file due to larger file size
 *.csv
 
-* ignoring the figures folder
+# ignoring the figures folder
 **/fig/
+
+# ignoring pptx
+*.pptx
