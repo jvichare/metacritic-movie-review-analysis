@@ -3,17 +3,20 @@ from metacritic.items import MetacriticItem
 import re
 import numpy as np
 
+
 class MetacriticSpider(Spider):
     name = 'metacritic_spider'
     allowed_urls = ['http://www.metacritic.com']
-    start_urls = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected=2018&sort=desc']
+    start_urls = [
+        'http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected=2018&sort=desc']
 
     def parse(self, response):
         """
         This function constructs a list of all the URLs for the most discussed movies
         from years 2010 to 2018, and will yield requests for each of them.
         """
-        year_url_list = ['http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2009, -1)]
+        year_url_list = [
+            'http://www.metacritic.com/browse/movies/score/metascore/discussed/filtered?year_selected={}&sort=desc'.format(x) for x in range(2018, 2009, -1)]
 
         for url in year_url_list:
             yield Request(url=url, callback=self.parse_year_page)
@@ -37,23 +40,27 @@ class MetacriticSpider(Spider):
         This function grabs the critic reviews URL and user reviews URL for each movie,
         as well as specific information available on the movie page
         """
-        movie = response.xpath('//div[@class="product_page_title oswald"]/h1/text()').extract_first()
-        release_date = response.xpath('//span[@class="release_date"]/span[2]/text()').extract_first()
-        genre_list = response.xpath('//div[@class="genres"]/span[2]').extract() # have to fix this list
+        movie = response.xpath(
+            '//div[@class="product_page_title oswald"]/h1/text()').extract_first()
+        release_date = response.xpath(
+            '//span[@class="release_date"]/span[2]/text()').extract_first()
+        genre_list = response.xpath(
+            '//div[@class="genres"]/span[2]').extract()  # have to fix this list
         scores = response.xpath('//a[@class="metascore_anchor"]/div/text()').extract()
         try:
-            metascore = int(scores[0]) # integer from 0 - 100
+            metascore = int(scores[0])  # integer from 0 - 100
         except:
             metascore = np.nan
         try:
-            user_score = float(scores[1]) # number between 0 - 10, that is why I use 
-                                        # float() instead of int()
+            user_score = float(scores[1])  # number between 0 - 10, that is why I use
+            # float() instead of int()
         except:
             user_score = np.nan
 
         # cleaning up the scraped list of genres
         genre_string = ''.join(genre_list)
-        genre = re.findall('[A-Z]+[a-z]*\-*[A-Z]*[a-z]*', genre_string) # have to account for Sci-Fi with this regex
+        # have to account for Sci-Fi with this regex
+        genre = re.findall('[A-Z]+[a-z]*\-*[A-Z]*[a-z]*', genre_string)
 
         # grabbing the path for critic and user reviews
         critic_review_path = response.xpath('//a[@class="see_all boxed oswald"]/@href').extract()[0]
@@ -66,17 +73,17 @@ class MetacriticSpider(Spider):
         num_user_reviews = int(re.search('\d+', num_user_reviews).group())
 
         yield Request(url=critic_review_url, meta={'movie': movie,
-                                                    'release_date': release_date,
-                                                    'genre': genre,
-                                                    'metascore': metascore,
-                                                    'user_score': user_score}, callback=self.parse_critic_reviews)
+                                                   'release_date': release_date,
+                                                   'genre': genre,
+                                                   'metascore': metascore,
+                                                   'user_score': user_score}, callback=self.parse_critic_reviews)
 
         yield Request(url=user_review_url, meta={'movie': movie,
-                                                    'release_date': release_date,
-                                                    'genre': genre,
-                                                    'metascore': metascore,
-                                                    'user_score': user_score,
-                                                    'num_user_reviews': num_user_reviews}, callback=self.parse_user_reviews)
+                                                 'release_date': release_date,
+                                                 'genre': genre,
+                                                 'metascore': metascore,
+                                                 'user_score': user_score,
+                                                 'num_user_reviews': num_user_reviews}, callback=self.parse_user_reviews)
 
     def parse_critic_reviews(self, response):
         """
@@ -90,7 +97,8 @@ class MetacriticSpider(Spider):
         user_score = response.meta['user_score']
 
         # Getting the review attributes in a list
-        reviews = response.xpath('//div[@class="critic_reviews"]//a[@class="no_hover"]/text()').extract()
+        reviews = response.xpath(
+            '//div[@class="critic_reviews"]//a[@class="no_hover"]/text()').extract()
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
 
@@ -121,7 +129,7 @@ class MetacriticSpider(Spider):
     def parse_user_reviews(self, response):
         """
         This function grabs the name of each user, their individual score, and their entire review.
-        """        
+        """
         # Calling back the previous meta attributes
         movie = response.meta['movie']
         release_date = response.meta['release_date']
@@ -144,11 +152,14 @@ class MetacriticSpider(Spider):
         # does not need expansion.
         for review in reviews:
             if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
-                review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
+                review_list.append("".join(review.xpath(
+                    './/span[@class="blurb blurb_expanded"]/text()').extract_first()))
             elif len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) == 1:
-                review_list.append(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first())
+                review_list.append(review.xpath(
+                    './/span[@class="blurb blurb_expanded"]/text()').extract_first())
             else:
-                review_list.append(review.xpath('.//div[@class="review_body"]/span/text()').extract_first())
+                review_list.append(review.xpath(
+                    './/div[@class="review_body"]/span/text()').extract_first())
 
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
@@ -171,31 +182,31 @@ class MetacriticSpider(Spider):
                 item['review_score'] = np.nan
 
             yield item
-        
+
         # There are most certainly more pages (100 comments per page), getting pattern
         # of the following urls
         num_user_reviews = response.meta['num_user_reviews']
         rev_per_page = 100
 
-        num_pages = num_user_reviews // rev_per_page # not adding one since metacritic actually
-                                                     # indexes their successive review pages
-                                                     # starting from 0 (i.e. page 1 = '?page=0')
+        num_pages = num_user_reviews // rev_per_page  # not adding one since metacritic actually
+        # indexes their successive review pages
+        # starting from 0 (i.e. page 1 = '?page=0')
 
         # starting the range at 1 because we already scraped the first page ('page=0') of reviews
-        following_urls = [response.url + '?page={}'.format(x) for x in range(1, num_pages + 1)] 
+        following_urls = [response.url + '?page={}'.format(x) for x in range(1, num_pages + 1)]
 
         for url in following_urls:
             yield Request(url=url, meta={'movie': movie,
-                                            'release_date': release_date,
-                                            'genre': genre,
-                                            'metascore': metascore,
-                                            'user_score': user_score}, callback=self.parse_following_review_page)
+                                         'release_date': release_date,
+                                         'genre': genre,
+                                         'metascore': metascore,
+                                         'user_score': user_score}, callback=self.parse_following_review_page)
 
     def parse_following_review_page(self, response):
         """
         This function is the same as the parsing of the user reviews page, ignoring the multiple
         requests for the following review pages.
-        """        
+        """
         # Calling back the previous meta attributes
         movie = response.meta['movie']
         release_date = response.meta['release_date']
@@ -218,11 +229,14 @@ class MetacriticSpider(Spider):
         # does not need expansion.
         for review in reviews:
             if len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) > 1:
-                review_list.append("".join(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first()))
+                review_list.append("".join(review.xpath(
+                    './/span[@class="blurb blurb_expanded"]/text()').extract_first()))
             elif len(review.xpath('.//span[@class="blurb blurb_expanded"]/text()')) == 1:
-                review_list.append(review.xpath('.//span[@class="blurb blurb_expanded"]/text()').extract_first())
+                review_list.append(review.xpath(
+                    './/span[@class="blurb blurb_expanded"]/text()').extract_first())
             else:
-                review_list.append(review.xpath('.//div[@class="review_body"]/span/text()').extract_first())
+                review_list.append(review.xpath(
+                    './/div[@class="review_body"]/span/text()').extract_first())
 
         usernames = response.xpath('//span[@class="author"]/a/text()').extract()
         review_scores = response.xpath('//div[@class="left fl"]/div/text()').extract()
